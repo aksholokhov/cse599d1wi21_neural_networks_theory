@@ -1,0 +1,167 @@
+\documentclass{article}
+
+%
+% Homework Details
+%   - Title
+%   - Due date
+%   - Class
+%   - Section/Time
+%   - Instructor
+%   - Author
+%
+
+\newcommand{\hmwkTitle}{Homework\ \#1}
+\newcommand{\hmwkDueDate}{February, 15th}
+\newcommand{\hmwkClass}{CSE 599 (Neural Networks Theory)}
+\newcommand{\hmwkClassInstructor}{Prof. Simon S. Du}
+\newcommand{\hmwkAuthorName}{\textbf{Alexey Sholokhov}}
+
+
+% PRESETS OF PACKAGES AND MATH %
+\input{useful_packages}
+\input{math_macros}
+
+%
+% Basic Document Settings
+%
+\graphicspath{figures/}
+
+\topmargin=-0.45in
+\evensidemargin=0in
+\oddsidemargin=0in
+\textwidth=6.5in
+\textheight=9.0in
+\headsep=0.25in
+
+\linespread{1.1}
+
+\pagestyle{fancy}
+\lhead{\hmwkAuthorName}
+\chead{\hmwkClass}
+\rhead{\hmwkTitle}
+\lfoot{\lastxmark}
+\cfoot{\thepage}
+
+\renewcommand\headrulewidth{0.4pt}
+\renewcommand\footrulewidth{0.4pt}
+
+\setlength\parindent{0pt}
+
+%
+% Create Problem Sections
+%
+
+\newcommand{\enterProblemHeader}[1]{
+    \nobreak\extramarks{}{Problem \arabic{#1} continued on next page\ldots}\nobreak{}
+    \nobreak\extramarks{Problem \arabic{#1} (continued)}{Problem \arabic{#1} continued on next page\ldots}\nobreak{}
+}
+
+\newcommand{\exitProblemHeader}[1]{
+    \nobreak\extramarks{Problem \arabic{#1} (continued)}{Problem \arabic{#1} continued on next page\ldots}\nobreak{}
+    \stepcounter{#1}
+    \nobreak\extramarks{Problem \arabic{#1}}{}\nobreak{}
+}
+
+\setcounter{secnumdepth}{0}
+\newcounter{partCounter}
+\newcounter{homeworkProblemCounter}
+\setcounter{homeworkProblemCounter}{1}
+\nobreak\extramarks{Problem \arabic{homeworkProblemCounter}}{}\nobreak{}
+
+%
+% Homework Problem Environment
+%
+% This environment takes an optional argument. When given, it will adjust the
+% problem counter. This is useful for when the problems given for your
+% assignment aren't sequential. See the last 3 problems of this template for an
+% example.
+%
+\newenvironment{homeworkProblem}[1][-1]{
+    \ifnum#1>0
+        \setcounter{homeworkProblemCounter}{#1}
+    \fi
+    \section{Problem \arabic{homeworkProblemCounter}}
+    \setcounter{partCounter}{1}
+    \enterProblemHeader{homeworkProblemCounter}
+}{
+    \exitProblemHeader{homeworkProblemCounter}
+}
+
+
+%
+% Title Page
+%
+
+\title{
+    \vspace{2in}
+    \textmd{\textbf{\hmwkClass:\ \hmwkTitle}}\\
+    \normalsize\vspace{0.1in}\small{Due\ on\ \hmwkDueDate\ at 23:59}\\
+    \vspace{0.1in}\large{\textit{\hmwkClassInstructor}}
+    \vspace{3in}
+}
+
+\author{\hmwkAuthorName}
+\date{}
+
+\renewcommand{\part}[1]{\textbf{\large Part \Alph{partCounter}}\stepcounter{partCounter}\\}
+
+% Homework-specific commands
+\newcommand{\db}{\mathrm{d}b}
+\newcommand{\dth}{\mathrm{d}\theta}
+
+\begin{document}
+
+\maketitle
+
+\pagebreak
+
+\begin{homeworkProblem}
+\paragraph{Solution for 1.1} Let $g \in C^2$, $g(0) = g'(0) = 0$, $\sigma(a) \definedas a\ind{a > 0}$. Taking the integral from the assignment by parts we get that:
+	\eq{
+		\int_0^1\sigma(x - b)g''(b)\db = \int_0^1(x-b)\int{x - b > 0}g\\(b)\db = \int_0^x (x-b)g''(b)\db = (x-b)g'(x)\at{0}{x} - \int_0^x g'(b)\db = g(x)
+	}
+	\qed
+\paragraph{Solution for 1.2} First, we notice that $|g''|\leq \beta$ implies that $g$ is a $\beta$-smooth function, i.e. its gradient $g'$ is $\beta$-Lipschitz continuous. Since this is the case, we can use the theorem from Feb. 11th lecture to show that there is a threshold network that approximates the derivative $g'(x)$ $\varepsilon$-well by infinity-norm:
+	\eq{
+	\label{eq:p1_threshold}
+	\|g(x)' - f(x)\|_\infty = \left\|g(x) - \sum_{i=1}^m a_i\ind{x - x_i} \right\|_\infty \leq \varepsilon
+	}
+	where $x_i \definedas (i-1)\varepsilon\beta^{-1}$, $m \definedas \lceil \beta\varepsilon^{-1}\rceil$, and $a_i = g'(x_i) - g'(x_{i-1})$. We also know that if $\|g-f\|_\infty = \max_{x \in [a, b]}|g(x) - f(x)| \leq \varepsilon$ then 
+	\eq{
+	\left\|\int{(f - g)}\right\|_\infty = \max_{x\in [a, b]} \left|\int_a^x(f(b)-g(b))\db\right| \leq \max_{x \in [a, b]}\int_a^x\left|f(b) - g(b)\right|\db \leq \varepsilon*(b-a)}
+	In particular, we can apply this lemma to the equation (\ref{eq:p1_threshold}) to get an approximation of $g(x)$ with a shallow neural network:
+	
+	\eq{
+		\max_{x \in [0, 1]}\left|\int_0^x\left(g'(x) - f(x)\right) \right| = &  \max_{x \in [0, 1]}\left|g(x) -\cancelto{0}{g(0)} - \int_0^x\sum_{i=1}^m a_i \ind{b - x_i}\db\right| = \\
+		= & \max_{x \in [0, 1]}\left|g(x) - \sum_{i=1}^m a_i \int_0^x\ind{b - x_i}\db\right| = \\
+		= & \max_{x \in [0, 1]}\left|g(x) - \sum_{i=1}^m (g'(x_i) - g'(x_{i-1})) \sigma({x - x_i})\right| \leq \varepsilon(1-0) \leq \varepsilon \\
+	} \qed
+\paragraph{Solution for 1.3} First, we notice that the equation that we proved in the problem 1.1 is a representation of $g(x)$ with an infinite-wide shallow neural network with ReLU activation function. Now we use Pister's lemma: according to it we can sample coefficients $\{a_i,\ b_i\}_{i=1}^m$ from the signed density function $\mu(b) = g''(b)\db$ such that 
+	\eq{
+		\left\|g(x) - \frac{1}{m}\sum_{i=1}^m a_i\sigma(x-b_i)\right\|_{L_2}^2 & \leq \expectation{\|g(x) - \frac{1}{m}\sum_{i=1}^m a_i\sigma(x-b_i)\|} \leq \|\mu\|_1^2\sup_b\left\|\sigma(x - b)\right\|_{L_2(P_X)} = \\
+		& \frac{1}{m}\left(\int_0^1 |g''(x)|\dx \right)^2\sup_{b \leq 1}\cancelto{=b^3/3 \leq 1}{\int_0^1\sigma^2(\xi - b)\mathrm{d}\xi} \leq \varepsilon
+	}
+	According to Pister's lemma, for $\varepsilon > 0$ the above holds for some $m\leq \lceil\varepsilon^{-1}\left(\int_0^1 |g''(x)|\dx \right)^2\rceil$, which is what we want. \qed
+\end{homeworkProblem}
+
+
+\begin{homeworkProblem}
+\paragraph{Solution for 2.1} First, we split the expectation from the problem assignment into a full system of four cases: 
+\begin{enumerate}
+	\item Let $x^Tw \geq 0$ and $x^Tw^* \geq 0$. Treating all expectations below as conditionals on the event, we get:
+	\eq{
+		\expectation{(\sigma(x^Tw) - \sigma(x^Tw^*))^2} = \expectation{(x^Tw)^2} - \expectation{2x^Twx^Tw^*} + \expectation{(x^Tw^*)^2}
+	}
+	We'll evaluate all three expectations using polar coordinates. Let $\theta_x$ be the angle of $x$, $\theta_w$ be the angle of $w^*$, $\theta_{w^*}$ be the angle of $w^*$, and $\theta^*$ be the angle between $w$ and $w^*$. Since $x^Tw \geq 0$ we know that $\theta_x - \theta_w \in [-\pi/2; \pi/2]$. Similarly, $x^Tw^* \geq 0$ gives us $\theta_x - \theta_{w^*} = \theta_x - \theta_w - \theta^* \in [-\pi/2; \pi/2]$. The intersection of these bounds is $\theta_x - \theta_w \in [-\pi/2 + \theta^*; \pi/2]$, which provides us with bounds for the polar part in the integrals below:
+	\eq{
+		\expectation{(x^Tw)^2} & = \frac{1}{2\pi}\int_{x^Tw \geq 0, x^Tw^* \geq 0}\|x\|_2^2\|w\|_2^2 e^{-x^Tx/2}dx  = \\ 
+		& = \frac{1}{2\pi}\cancelto{2}{\int_0^\infty r^3 e^{-r^2/2}dr}\ * \ \int_{\theta_x - \theta_w = -\pi/2+\theta^*}^{\pi/2} 1\mathrm{d}(\theta_x - \theta_w) = \frac{1}{\pi}(\pi -\theta^*)\|w\|_2^2
+	} 
+	Symmetrically, we have $\expectation{(x^Tw^*)^2} = \frac{1}{\pi}(\pi -\theta^*)\|w^*\|_2^2$. It gets more involved with the cross term:
+	\eq{
+	\expectation{x^Twx^Tw^*} = 
+	}
+\end{enumerate}
+\end{homeworkProblem}
+
+\end{document}
