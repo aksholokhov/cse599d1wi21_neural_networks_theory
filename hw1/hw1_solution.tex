@@ -107,6 +107,7 @@
 
 % Homework-specific commands
 \newcommand{\db}{\mathrm{d}b}
+\newcommand{\dr}{\mathrm{d}r}
 \newcommand{\dth}{\mathrm{d}\theta}
 
 \begin{document}
@@ -155,13 +156,114 @@
 	We'll evaluate all three expectations using polar coordinates. Let $\theta_x$ be the angle of $x$, $\theta_w$ be the angle of $w^*$, $\theta_{w^*}$ be the angle of $w^*$, and $\theta^*$ be the angle between $w$ and $w^*$. Since $x^Tw \geq 0$ we know that $\theta_x - \theta_w \in [-\pi/2; \pi/2]$. Similarly, $x^Tw^* \geq 0$ gives us $\theta_x - \theta_{w^*} = \theta_x - \theta_w - \theta^* \in [-\pi/2; \pi/2]$. The intersection of these bounds is $\theta_x - \theta_w \in [-\pi/2 + \theta^*; \pi/2]$, which provides us with bounds for the polar part in the integrals below:
 	\eq{
 		\expectation{(x^Tw)^2} & = \frac{1}{2\pi}\int_{x^Tw \geq 0, x^Tw^* \geq 0}\|x\|_2^2\|w\|_2^2 e^{-x^Tx/2}dx  = \\ 
-		& = \frac{1}{2\pi}\cancelto{2}{\int_0^\infty r^3 e^{-r^2/2}dr}\ * \ \int_{\theta_x - \theta_w = -\pi/2+\theta^*}^{\pi/2} 1\mathrm{d}(\theta_x - \theta_w) = \frac{1}{\pi}(\pi -\theta^*)\|w\|_2^2
+		& = \frac{1}{2\pi}\cancelto{2}{\int_0^\infty r^3 e^{-r^2/2}dr}\ * \ \int_{\theta_x - \theta_w = -\pi/2+\theta^*}^{\pi/2} cos^2(\theta_x - \theta_w)\mathrm{d}(\theta_x - \theta_w) = \\ 
+		& = \frac{1}{2\pi}(\pi -\theta^* + \sin(\theta^*)\cos(\theta^*))\|w\|_2^2
 	} 
-	Symmetrically, we have $\expectation{(x^Tw^*)^2} = \frac{1}{\pi}(\pi -\theta^*)\|w^*\|_2^2$. It gets more involved with the cross term:
+	Symmetrically, we have $\expectation{(x^Tw^*)^2} = \frac{1}{2\pi}(\pi -\theta^* + \sin(\theta^*)\cos(\theta^*))\|w^*\|_2^2$. For the cross term:
 	\eq{
-	\expectation{x^Twx^Tw^*} = 
+	\expectation{x^Twx^Tw^*} & = \expectation{\|x\|_2^2\|w\|_2\|w^*\|_2\cos(\theta_x - \theta_w)\cos(\theta_x - \theta_{w^*})} = \\
+	& = \|w\|_2\|w^*\|_2\frac{1}{2\pi}\int_0^\infty r^3e^{-r^2/2}\dr\int_{-\pi/2 + \theta^*}^{\pi/2}\cos(\theta)\cos(\theta - \theta^*)\dth = \\
+	& = \|w\|_2\|w^*\|_2\frac{1}{\pi}\frac{1}{2}(\sin(\theta^*) + (\pi - \theta^*)\cos\theta^*) 
+	}
+	\item Let $x^Tw \geq 0$ and $x^Tw^* < 0$, then $\theta_x - \theta_w \in [-\pi/2; -\pi/2 + \theta^*$. Hence, the conditional expectation 
+	\eq{
+		\expectation{(\sigma(x^Tw) - \sigma(x^Tw^*))^2} = \expectation{(x^Tw)^2} = \frac{\|w\|^2}{\pi}\int_{-\pi/2}^{-\pi/2+\theta^*}1\dth = \frac{\|w\|^2}{2\pi}(\theta^* - \sin\theta\cos\theta^*)
+	}
+	Symmetrically, the case of $x^Tw < 0$ and $x^Tw^* \geq 0$ yields
+	\eq{
+		\expectation{(\sigma(x^Tw) - \sigma(x^Tw^*))^2} =\frac{\|w^*\|^2}{2\pi}(\theta^* - \sin\theta\cos\theta^*)
 	}
 \end{enumerate}
+Now we open the expectation up using the full probability formula. Combining the pieces above together and cancelling out matching terms gives us
+\eq{
+	 & \expectation{(\sigma(x^Tw) - \sigma(x^Tw^*))^2} =  \frac{1}{2\pi}(\pi -\theta^* + \sin(\theta^*)\cos(\theta^*))\|w\|_2^2 - \\ 
+	& -2\|w\|_2\|w^*\|_2\frac{1}{\pi}\frac{1}{2}(\sin(\theta^*) + (\pi - \theta^*)\cos\theta^*) + \frac{1}{2\pi}(\pi -\theta^* + \sin(\theta^*)\cos(\theta^*))\|w^*\|_2^2 + \\
+	& + \frac{\|w\|^2}{2\pi}(\theta^* - \sin\theta\cos\theta^*) + \frac{\|w^*\|^2}{2\pi}(\theta^* - \sin\theta\cos\theta^*) = \\
+	& = \half \|w\|^2 - \|w\|_2\|w^*\|_2\frac{1}{\pi}(\sin(\theta^*) + (\pi - \theta^*)\cos\theta^*) + \half \|w^*\|^2 
+}
+which is what we want to show. 
+\newpage
+Now we take the derivative of the formula above with respect to $w$:
+\eq{
+	\nabla_w f(w) & = w + \cancelto{0}{\nabla_w(\|w^*\|_2^2))} - \nabla_w\left(\|w\|_2\|w^*\|_2\frac{1}{\pi}(\sin(\theta^*) + (\pi - \theta^*)\cos\theta^*)\right) = \\
+	& = w  - \frac{1}{\pi}\|w^*\|_2\frac{w}{\|w\|_2}(\sin\theta^* + (\pi - \theta^*)\cos\theta^*) + \\ & + \frac{1}{\pi}\|w\|_2\|w^*\|_2(\nabla(\sin\theta^*) + \pi\nabla(\cos\theta^*) - \nabla(\sin\theta^*) - \theta^*\nabla(\cos\theta^*)) \boxaround{=}{red} 
+}
+We can evaluate $\nabla_w(\cos\theta^*)$ by opening it up as a scalar product:
+\eq{
+	\nabla_w(\cos\theta^*) = \nabla_w\left(\frac{w^Tw^*}{\|w\|_2\|w^*\|_2}\right) = \frac{w^*}{\|w\|_2\|w^*\|_2} - \underbrace{\frac{w^Tw^*}{\|w\|_2\|w^*\|_2}}_{\cos\theta^*}\frac{w}{\|w\|_2^2} 
+}
+Substituting this result back we get
+\eq{
+	& \boxaround{=}{red} w - \frac{1}{\pi}\|w^*\|_2\frac{w}{\|w\|_2}(\sin\theta^* + \cancel{(\pi - \theta^*)\cos\theta}) + \frac{1}{\pi}\|w\|_2\|w^*\|_2(\pi - \theta^*)\left[\frac{w^*}{\|w\|_2\|w^*\|_2} - \cancel{\cos\theta^*\frac{w}{\|w\|_2^2}}\right] = \\
+	& = w - \frac{w}{\pi}\frac{\|w^*\|_2}{\|w\|_2}\sin\theta^* - \frac{w^*}{\pi}(\pi - \theta^*)
+}
+which is what we want. \qed
+
+\paragraph{Solution for 2.2} The set of critical points is a solution set for $\nabla f(w) = 0$. As asked, let's assume $w \neq 0$. Notice that the same equation for the gradient can be written as 
+\eq{
+	\alpha w = \beta w^*
+}
+It implies that $w$ should be collinear to $w^*$ for each critical point. In other words $\theta^* = 0$ for these points. Evaluating $\alpha$ and $\beta$ with this condition makes it clear that there is only one such point: $w = w^*$.
+\eq{
+	\alpha & = 1 - \frac{1}{\pi}\frac{\|w^*\|_2}{\|w\|_2}\sin 0 = 1 \\
+	\beta & = \frac{1}{\pi}(\pi - 0) = 1
+} \qed
+
+\paragraph{Solution for 2.3} Let's notice that the equation for $w_{t+1}$ can be written as:
+
+\eq{
+	w_{t+1} =  w_t\alpha(w_t) + \beta(w_t)w^* = w_t(1 - \eta g(w_t)) + \beta(w_t)w^*, \quad \alpha(w_t),\ \beta(w_t) \in \R
+}
+where 
+\eq{
+	g(w_t) = 1 - \frac{\sin\theta(w_t, w^*)}{\pi}\frac{\|w^*\|_2}{\|w_t\|}_2 \in [0, 1]
+}
+It means that for any $\eta < 1$ $\alpha = (1 - \eta g(w_t)) < 1$. Then we have that $w_{t+1} = \alpha_t w_t + \beta_t w^* = \alpha_t(\alpha_{t-1} w_{t-1} + \beta_{t-1}w^*) + \beta_t w^* = w\prod_{j = 1}^t \alpha_j + w^*(\beta_t\sum_{j=t-1}^1\beta_j\alpha_{j+1}\beta_{j})$. The sequence of angles $\theta_t = \theta(w_t, w^*)$ is non-increasing because the product of $\alpha_j$ is non-increasing for any $\alpha_j < 1$. Hence, $\theta(w_{t+1}, w^*) \leq \theta(w_{t}, w^*)$.\qed  
+\end{homeworkProblem}
+
+\begin{homeworkProblem}
+	First, we notice that since we're given that the matrix $M$ has an eigendecomposition $M = \sum_{i=1}^d\lambda_i u_i u_i^T$ it implies that the matrix $M$ is symmetric: $M^T = \sum_{i=1}^d\lambda_i (u_i u_i^T)^T = \sum_{i=1}^d\lambda_i u_i u_i^T = M$. Next, we use this fact ($M_{ij} = M_{ji}$) to simplify the gradient:
+	
+	\eq{
+		\pderiv{f}{x_i} & = \half\sum_{j \neq i}^d x_j(x_ix_j - M_{ij}) + \half\sum_{j \neq i}^d x_j(x_jx_i - M_{ji}) + x_i(x_i^2 - M_{ii}) = 
+		\\ & = \sum_{j=1}^d x_j(x_ix_j - M_{ij})
+	}
+	The gradient in the vector form is:
+	\eq{
+		\nabla f(x) = x\|x\|_2^2 - Mx
+	}
+	The stationary equation for such system gives us that the set of stationary points match to the set of eigenvectors multiplied by the square root of respective eigenvalues (plus zero):
+	\eq{
+		Mx = \|x\|x \ \implies \ x^*_0 = 0, \ x^*_j = \sqrt{\lambda_j}u_j 
+	}
+	where we used the fact that the matrix $U$ in the eigendecomposition of $M$ is orthonormal, hence all eigenvectors are unit and orthogonal.  
+	
+	To establish qualities of these critical points (minima, maxima, saddles) we use Hessian:
+	\eq{
+		[\nabla^2f(x)]_{ik} = \left[\sum_{j=1}^d x_j(x_ix_j - M_{ij})\right]'_k = \{k \neq i\}(2x_kx_i - M_{ik}) + \{k = i\}(\sum_{j\neq k} x_jx_j + 3x_k^2 - M_{kk})
+	}
+	Hence, Hessian in the matrix from looks like
+	\eq{
+		\nabla^2 f(x) = 2xx^T - M + \|x\|_2^2I
+	}
+	Now let's consider all possible stationary points:
+	\begin{itemize}
+		\item $x = x_0^* = 0$. In this case, $\nabla^2 f(x) = -M$ where $M$ is a PSD matrix. It implies that $x^*=0$ is a local maximum, and so any direction that corresponds to, say, non-zero eigenvector of M will be a descent direction.
+		\item $x = x_1^* = \sqrt(\lambda_1)u_i$. It's easy to show that this point is a global minimum: out of all critical points $\{x_i^*\}_{i=1}^d$ the function $f(x)$ achieves minimal value at $x = x_1^*$.
+			\eq{
+				f(x_1^*) = \frac{1}{4}\|\lambda_1u_1u_1^T - \sum_{i = 1}^d\lambda_iu_iu_i^T\| = \frac{1}{4}\|\sum_{i=2}^d\lambda_iu_iu_i^T\|_F^2 = \sum_{i=2}^d\lambda_i^2 \leq \sum_{i\neq j}\lambda_i^2 = f(x_j^*), \quad j \neq 1 
+			} 
+		\item  Now we show that the rest of the critical points are saddle points and that they're strict. Let's consider $x = x_i^*$, $i \neq 1$. Hessian at this point looks like:
+			\eq{
+				\nabla^2f(x_i^*) = \lambda_iI + \lambda_i u_i u_i^T - \sum_{j \neq i} \lambda_j u_j u_j^T
+			}
+			It's clear that the direction $w = \sqrt{\lambda_1}u_1$ is a descent direction from any of the points $x_i^*$, $i \neq 1$
+			\eq{
+				\lambda_1u_1\nabla^2f(x_i^*)u_1 = \lambda_i\lambda_1 + 0 - \lambda_1^2 < 0
+			}
+			which is what we need. 
+	\end{itemize}
+	\qed
 \end{homeworkProblem}
 
 \end{document}
