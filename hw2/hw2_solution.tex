@@ -1,0 +1,285 @@
+\documentclass{article}
+
+%
+% Homework Details
+%   - Title
+%   - Due date
+%   - Class
+%   - Section/Time
+%   - Instructor
+%   - Author
+%
+
+\newcommand{\hmwkTitle}{Homework\ \#2}
+\newcommand{\hmwkDueDate}{March, 3rd, 2021}
+\newcommand{\hmwkClass}{CSE 599 D1 (Neural Networks Theory)}
+\newcommand{\hmwkClassInstructor}{Prof. Simon Du}
+\newcommand{\hmwkAuthorName}{\textbf{Alexey Sholokhov}}
+
+
+% PRESETS OF PACKAGES AND MATH %
+\input{useful_packages}
+\input{math_macros}
+
+%
+% Basic Document Settings
+%
+\graphicspath{figures/}
+
+\topmargin=-0.45in
+\evensidemargin=0in
+\oddsidemargin=0in
+\textwidth=6.5in
+\textheight=9.0in
+\headsep=0.25in
+
+\linespread{1.1}
+
+\pagestyle{fancy}
+\lhead{\hmwkAuthorName}
+\chead{\hmwkClass}
+\rhead{\hmwkTitle}
+\lfoot{\lastxmark}
+\cfoot{\thepage}
+
+\renewcommand\headrulewidth{0.4pt}
+\renewcommand\footrulewidth{0.4pt}
+
+\setlength\parindent{0pt}
+
+%
+% Create Problem Sections
+%
+
+\newcommand{\enterProblemHeader}[1]{
+    \nobreak\extramarks{}{Problem \arabic{#1} continued on next page\ldots}\nobreak{}
+    \nobreak\extramarks{Problem \arabic{#1} (continued)}{Problem \arabic{#1} continued on next page\ldots}\nobreak{}
+}
+
+\newcommand{\exitProblemHeader}[1]{
+    \nobreak\extramarks{Problem \arabic{#1} (continued)}{Problem \arabic{#1} continued on next page\ldots}\nobreak{}
+    \stepcounter{#1}
+    \nobreak\extramarks{Problem \arabic{#1}}{}\nobreak{}
+}
+
+\setcounter{secnumdepth}{0}
+\newcounter{partCounter}
+\newcounter{homeworkProblemCounter}
+\setcounter{homeworkProblemCounter}{1}
+\nobreak\extramarks{Problem \arabic{homeworkProblemCounter}}{}\nobreak{}
+
+%
+% Homework Problem Environment
+%
+% This environment takes an optional argument. When given, it will adjust the
+% problem counter. This is useful for when the problems given for your
+% assignment aren't sequential. See the last 3 problems of this template for an
+% example.
+%
+\newenvironment{homeworkProblem}[1][-1]{
+    \ifnum#1>0
+        \setcounter{homeworkProblemCounter}{#1}
+    \fi
+    \section{Problem \arabic{homeworkProblemCounter}}
+    \setcounter{partCounter}{1}
+    \enterProblemHeader{homeworkProblemCounter}
+}{
+    \exitProblemHeader{homeworkProblemCounter}
+}
+
+
+%
+% Title Page
+%
+
+\title{
+    \vspace{2in}
+    \textmd{\textbf{\hmwkClass:\ \hmwkTitle}}\\
+    \normalsize\vspace{0.1in}\small{Due\ on\ \hmwkDueDate\ at 23:59}\\
+    \vspace{0.1in}\large{\textit{\hmwkClassInstructor\ }}
+    \vspace{3in}
+}
+
+\author{\hmwkAuthorName}
+\date{}
+
+\renewcommand{\part}[1]{\textbf{\large Part \Alph{partCounter}}\stepcounter{partCounter}\\}
+
+\begin{document}
+
+\maketitle
+
+\pagebreak
+
+\begin{homeworkProblem}
+  \paragraph{Solution for 1.1} From the lecture on February 1st we know that the gradient flow yields the following dynamics when applied to a least-squares fitting problem:
+  \eq{
+  	\dderiv{\half \|u(t) - y\|_2^2}{t} = -\frac{1}{n}(u(t) - y)^TH(t)(u(t) - y)
+  }
+  where $u(t)$ is a model with parameters $w_t$, $y$ is the vector of target variable, and 
+  \eq{
+  	[H(t)]_{ij} \definedas \left<\pderiv{[u(t)]_i}{w}, \pderiv{[u(t)]_j}{w} \right>
+  }
+  In this problem, our model $u(t)$ is $X^Tw_t$, hence $H = X^TX \in \R^{n \times n}$ is a full-rank matrix that does not depend on $t$ and has a positive minimum eigenvalue. It exactly meets the assumptions of the ``Consequence in Training'' corollary from the lecture notes where we show that in such case the loss goes to zero exponentially fast. The convergence speed is determined by the lower-bound $\lambda_0$ on the smallest eigenvalue of the matrix $H$:
+  \eq{
+  	\half \|u(t) - y\|_2^2 \leq e^{-\frac{\lambda_0t}{2}}
+  }\qed
+  \paragraph{Solution for 1.2}
+  Our loss function is defined as 
+  \eq{
+  	L(w_t) = \frac{1}{2n}\|X^Tw_t - y\|_2^2
+  }
+  The gradient of $L(w)$ is
+  \eq{
+  	\nabla_w L(w_t) = \frac{1}{2}X(X^Tw_t - y)
+  }
+  Hence, the gradient flow equation for this problem is 
+  \eq{
+  	\dderiv{w_t}{t} = - \frac{1}{n}X^TXw_t + \frac{1}{n}Xy 
+  }
+  Due to the principle of superposition, a solution for this problem is a sum of solutions for its homogeneous and inhomogeneous parts:
+  \eq{
+  w(t) = w_{H}(t) + w_{NH}(t)
+  }
+  From taking ODE classes we know that the general solution for the homogeneous equation $\dot{w} = Aw$ lies in the basis of the singular vectors of the matrix $A$. For our problem, $A = \frac{1}{n}XX^T$. 
+  
+  There are couple things to notice about the SVD decomposition for $XX^T$. Let's say that $X = U\Sigma V$. First, we know that taking a power of the matrix does not change the content of its singular basis (columns of U):
+  \eq{
+  	X = U\Sigma V^* \implies XX^T = U \Sigma^2 U^*
+  }
+  Second, we know that for an SVD of $X$ we can write that 
+  \eq{
+  	XV = U\Sigma
+  }
+  Since $\Sigma$ is a diagonal matrix non-zeros in first $n$ diagonal entries, we can surely say that the first $n$ columns of $U$ have to belong to the column-span of $X$. In general, it's not true about the rest $d - n$ columns of $U$: they are chosen so that $U$ is an orthonormal matrix, and the equation above holds for these vectors not because they belong to the column-span of $X$, but because the respective diagonal entries in $\Sigma$ are zero, and so this part of $U$ cancels out. Keeping this in mind, we split the solution $w_H(t)$ for the homogeneous part into two sums:
+  \eq{
+  	w_{H}(t) = \frac{1}{n}\sum_{i = 1}^n C_iu_ie^{-\lambda_i^2t} + \frac{1}{n}\sum_{j = n+1}^d C_ju_j\cancelto{1}{e^{-\lambda_j^2t}}
+  }
+  where $C_i$ and $C_j$ are constant coefficients.
+  The non-homogeneous part of this ODE is separable by its coordinates, so we obtain the general solution by integrating coordinate-wise:
+  \eq{
+  	w_{NH}(t) = \frac{t}{n}Xy + D
+  }
+  where $D$ is an unknown constant vector. The overall general solution is 
+  \eq{
+  	w(t) = w_{H}(t) = \frac{1}{n}\sum_{i = 1}^n C_iu_ie^{-\lambda_i^2t} + \frac{t}{n}Xy + D'
+  }
+  where $D' = D + \frac{1}{n}\sum_{j = n+1}^d C_ju_j$ is an undefined fixed vector. The first two summands in the solution belong to the column-span of $X$, as we discussed above. We show that $D'$ also belongs to this span using the initial condition:
+  \eq{
+  0 = w(0) = \frac{1}{n}\sum_{i = 1}^n C_iu_i + D' 
+  }
+  Since $\{u_i\}_{i=1}^n$ belong to the column-span of $X$, $D'$ also must belong to this span:  
+  \eq{
+  	D' = -\frac{1}{n}\sum_{i = 1}^n C_iu_i
+  }
+  Hence, the whole solution $w(t)$ lies in $\{x_1, \dots, x_n\}$. \qed
+  
+  \paragraph{Solution for 1.3}
+  From 1.2, we know that $w_t$ always lies in the span of $\{x_1, \dots, x_n\}$. It means that there are coefficients $\{c_1(t), \dots, c_n(t)\}$ such that
+  \eq{
+  	w(t) = \sum_{i=1}^n c_i(t)x_i
+  }
+  This is also true for the limiting case $t \to \infty$, that implies 
+  \eq{
+  	w^{\infty} = \sum_{i=1}^n c_i^\infty x_i = Xc^\infty
+  }
+  From 1.1 we know that $\lim_{t \to \infty} L(w(t)) = 0$, which means that the limiting solution fits the data precisely:
+  \eq{
+  	x_i^Tw^\infty = y_i, \, \text{ for all } i \in 1, \dots, n
+  }
+  Combining these two statements we're getting that 
+  \eq{
+  	X^TXc^\infty = y
+  }
+  Since $X^TX$ is a full-rank matrix, we have that its inverse exists and 
+  \eq{
+  	c^\infty = (X^TX)^{-1}y
+  }
+  and so the limiting solution is
+  \eq{
+  	w^\infty = X(X^TX)^{-1}y
+  }
+  Now let's save this result and then consider the second optimization problem independently of the results above:
+  \eq{
+  	\min_{w} \ & \|w\| \\
+  	\text{s.t. } & X^Tw = y
+  }
+  Since $\|w\| = \|w - 0\|$ we immediately notice that this is a projection problem, were we're looking for a projection of the origin onto the hyperplane $X^Tw = y$. From a linear algebra class, we know that this projection obeys the normal equation:
+  \eq{
+  	X(X^Tw - y) = 0
+  }
+  
+  The solution is unique in the minimal-norm sense and can be found via pseudo-inverse:
+  \eq{
+  	w^* = (XX^T)^\dagger Xy
+  }
+  In the class (Feb, 1st), we showed that $(X^TX)^{-1}X^T = X^T(XX^T)^{\dagger}$. Taking the transpose of both sides and noticing that $X^TX$ and $XX^T$ are symmetric matrices and so their inverses and pseudo-inverses are too, we get $X(X^TX)^{-1} = (XX^T)^\dagger X$. This implies that $w^* = w^\infty$ which concludes the proof. \qed
+\end{homeworkProblem}
+
+\begin{homeworkProblem}
+	\paragraph{Solution for 2.1} Let's fix some activation pattern $a'$ and consider $x, y \in S_{a'}$, and $\alpha, \beta \in \R$ such that $\alpha x + \beta y \in S_{a'}$. We will prove by induction that $x_h(x) = A_h(x)W_hx_{h-1}(x)$ is a linear function when restricted to $S_{a'}$. 
+	
+	Let's consider the base:
+	\eq{
+		x_1(\alpha x+\beta y) & = A(\alpha x+\beta y)W_1(\alpha x+\beta y) = \alpha A(\alpha x+\beta y)W_1x + \beta A(x+y)W_1y \\ & = \alpha A(x) W_1x + \beta A_1(y) W_1y = \alpha x_1(x) + \beta x_1(y)
+	}
+	Now, assuming that $x_{h-1}$ is a linear function we show that $x_{h}$ is also a linear function:
+	\eq{
+		x_h(\alpha x + \beta y) & = A_h(\alpha x + \beta y)W_h x_{h-1}(\alpha x + \beta y) = \\
+		& = A_h(\alpha x + \beta y)W_h(\alpha x_{h-1}(x) + \beta x_{h-1}(y)) \\
+		& = \alpha A_h(x)W_h x_{h-1}(x) + \beta A_h(y)W_h x_{h-1}(y) \\ 
+		& = \alpha x_h(x) + \beta x_h(y) 
+	}
+	where we used the fact that $A_h(\alpha x + \beta y) = A_h(x) = A_h(y)$ which is true when the inputs are restricted to $S_{a'}$. Finally, since we proved that $x_h(x)$ is linear, the linearity of $f(x) = W_{H+1}x_H(x)$ follows from the linearity of the scalar product. \qed
+	
+	\paragraph{Solution for 2.2} There are two approaches to prove this statement: a simple one with a looser bound and a more involved one with a better bound. We will give the first one and reference the second one. 
+	
+	\textbf{Approach 1:} as we've proven in 2.1, $f(x)$ is a linear function on every region $S_{a'}$. Every $x\in \R^d$ belongs to some $S_{a'}$ according to the activation pattern that it produces for a given neural network. It means that all $\R^d$ can be split into a disjunctive union of all possible $S_{a'}$ for a given network $f(x)$: 
+		\eq{
+		\R^{d} = \cup_i \{S_{a_i'}: \exists \ x \in \R^d \text{ s.t. } f(x) \text{ gives activation pattern } a'_i \}
+		}
+		 At worst, for each possible activation pattern $a'$ there will be an input $x$ that produces it. It means that $\R^d$ will be split into at most $k \leq 2^{m \times H}$ regions, where $f(x)$ is linear on each of that regions. This number is exponentially large but finite, so it's sufficient as a proof of existence. \qed
+		 \\
+		 \textbf{Approach 2:} \href{https://mjt.cs.illinois.edu/dlt/#smoothness-inequality-adapted-to-relu}{In his lecture notes} (Theorem 6.2) Matus Telgarsky takes more sophisticated approach that yields the estimate
+		 \eq{
+		 	k \leq \left(\frac{2m}{H}\right)^H
+		 }
+		 This is still exponentially large number, yet it's uniformly smaller than what the Approach 1 yields. It should come as no surprise, given that MJT actually counts the possible number of linear pieces as a result of superposition, instead of using a worst-case upper-bound. Nevertheless, both approaches show that the partitioning exists and the number of parts is finite. \qed 
+\end{homeworkProblem}
+
+\begin{homeworkProblem}
+	\paragraph{Solution for 3.1} First we notice that if a function $f(x)$ is $L$-positive-homogeneous then we have $f(0) = 0$. Indeed, let's take $\alpha > 0$, $\beta > 0$, $\alpha \neq \beta$. Then $\alpha^L \neq \beta^L$ for any $L \geq 0$. However, due to $L$-positive-homogeneity 
+	\eq{
+		\alpha^Lf(0) = f(\alpha * 0) = f(0) = f(\beta * 0) = \alpha^L f(0)
+	}
+	which can only be true if $f(0) = 0$. 
+	This result makes it trivial to show that when $x = 0$ we get:
+	\eq{
+		s^Tx = 0 = L*0 = Lf(0) = Lf(x)
+	}
+	for any $s$.
+	\paragraph{Solution for 3.2} Let's consider $x \neq 0$ such that $f(x)$ is differentiable in $x$ and so $\nabla f(x)$ exists at that point. Due to the definition of the gradient we have
+	\eq{
+		0 & = \lim_{\delta \to 0} \frac{f(x + \delta x) - f(x) - \nabla f(x)^T\delta x}{\delta} = \\
+		& = \lim_{\delta \to 0} \frac{(1 + \delta)^L - 1}{\delta} f(x) - \nabla f(x)^Tx = \\
+		& = Lf(x) - \nabla f(x)^Tx
+	}
+	where we used that $(1+\delta)^L = 1 + \delta L + o(\delta)$ to calculate the limit. \qed
+	
+	\paragraph{Solution for 3.3} Let $x \neq 0$ such that Clarke differential $\partial f(x)$ is defined. For every $s \in \partial f(x)$ at least one of two holds: 
+	\begin{enumerate}
+		\item there is a sequence $x_i$ with $\lim x_i = x$ such that $\lim \nabla f(x_i) = s$, or
+		\item $s = \sum_j c_js_j$ where $\sum_j c_j = 1$ and for every $s_j$ part (1) holds. 
+	\end{enumerate} 
+	Let's start with the fist case. Here we have that
+	\eq{
+		x^Ts = \lim_{i \to \infty} x_i^T\nabla f(x_i) = \lim_{i \to \infty} Lf(x_i) = Lf(x)
+	}
+	For the second case, we get that 
+	\eq{
+	x^Ts = x^T(\sum_j\alpha_j s_i) = \sum_j \alpha_j x^Ts_j = \sum_j \alpha_j Lf(x) = Lf(x)
+	}
+	which concludes the proof. \qed
+\end{homeworkProblem}
+
+\end{document}
